@@ -1,0 +1,43 @@
+services:
+  app:
+    image: yllumi/php83alpine:1.0
+    volumes:
+      - ./public:/var/www/html/public
+    networks:
+      - app-network
+    environment:
+      MYSQL_HOST: mariadb
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./app1/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  mariadb:
+    image: mariadb:10
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  dbdata:
+
+networks:
+  app-network:
+    driver: bridge
