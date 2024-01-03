@@ -1,10 +1,11 @@
 services:
   app:
-    image: yllumi/php83alpine:1.0
+    image: yllumi/php83:latest
     volumes:
       - ./public:/var/www/html/public
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.2
     environment:
       MYSQL_HOST: mariadb
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -17,11 +18,12 @@ services:
       - "80:80"
     volumes:
       - ./public:/var/www/html/public
-      - ./app1/conf.d:/etc/nginx/conf.d
+      - ./conf.d:/etc/nginx/conf.d
     depends_on:
       - app
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.3
 
   mariadb:
     image: mariadb:10
@@ -33,7 +35,8 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.4
 
 volumes:
   dbdata:
@@ -41,3 +44,6 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
